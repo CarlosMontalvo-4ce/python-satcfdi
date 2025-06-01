@@ -661,42 +661,44 @@ class Comprobante(CFDI):
         :param fecha: Atributo requerido para la expresión de la fecha y hora de expedición del Comprobante Fiscal Digital por Internet. Se expresa en la forma AAAA-MM-DDThh:mm:ss y debe corresponder con la hora local donde se expide el comprobante.
         :return: Comprobante
         """
-        if cls.version == "3.3":
-            receptor["UsoCFDI"] = "P01"
-        else:
-            receptor["UsoCFDI"] = "CN01"
-
+        
         valor_unitario = (
             complemento_nomina.get('TotalPercepciones') or Decimal(0)
         ) + (
             complemento_nomina.get('TotalOtrosPagos') or Decimal(0)
         )
         
-        concepto = Concepto(
-            clave_prod_serv='84111505',
-            cantidad=1,
-            clave_unidad='ACT',
-            descripcion='Pago de nómina',
-            valor_unitario=valor_unitario,
-            descuento=complemento_nomina.get('TotalDeducciones'),
-            objeto_imp="03"
-        )
+        receptor['UsoCFDI'] = 'CN01'
         
-        return cls(
-            emisor=emisor,
-            lugar_expedicion=lugar_expedicion,
-            receptor=receptor,
-            conceptos=concepto,
-            complemento=complemento_nomina,
-            serie=serie,
-            folio=folio,
-            moneda='MXN',
-            tipo_de_comprobante='N',
-            metodo_pago="PUE",
-            forma_pago="99",
-            cfdi_relacionados=cfdi_relacionados,
-            confirmacion=confirmacion,
-            exportacion="01",
-            addenda=addenda,
-            fecha=fecha,
-        )
+        concepto_vals = {
+            'clave_prod_serv' : '84111505',
+            'cantidad' : 1,
+            'clave_unidad' : 'ACT',
+            'descripcion' : 'Pago de nómina',
+            'valor_unitario' : valor_unitario,
+            'descuento' : complemento_nomina.get('TotalDeducciones'),
+            'objeto_imp' : '01'
+        }
+        
+        return_vals = {
+            'emisor' : emisor,
+            'lugar_expedicion' : lugar_expedicion,
+            'receptor' : receptor,
+            'complemento' : complemento_nomina,
+            'serie' : serie,
+            'folio' : folio,
+            'moneda' : 'MXN',
+            'tipo_de_comprobante' : 'N',
+            'metodo_pago' : 'PUE',
+            'cfdi_relacionados' : cfdi_relacionados,
+            'confirmacion' : confirmacion,
+            'exportacion' : '01',
+            'addenda' : addenda,
+            'fecha' : fecha
+        }
+        
+        concepto = Concepto(**concepto_vals)
+        
+        return_vals['conceptos'] = concepto
+          
+        return cls(**return_vals)
